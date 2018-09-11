@@ -8,11 +8,11 @@ import java.util.List;
 public class CourseEntityDao {
     private static Logger logger = LoggerFactory.getLogger(CourseEntityDao.class);
 
-    public CourseEntity save(CourseEntity courseEntity) {
+    public void save(CourseEntity courseEntity) {
         return null;
     }
 
-    public CourseEntity update(CourseEntity courseEntity) {
+    public void update(CourseEntity courseEntity) {
         return null;
     }
 
