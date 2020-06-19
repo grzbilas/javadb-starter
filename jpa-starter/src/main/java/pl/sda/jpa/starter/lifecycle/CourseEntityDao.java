@@ -9,11 +9,11 @@ public class CourseEntityDao {
     private static Logger logger = LoggerFactory.getLogger(CourseEntityDao.class);
 
     public void save(CourseEntity courseEntity) {
-        return null;
+        return;
     }
 
     public void update(CourseEntity courseEntity) {
-        return null;
+        return;
     }
 
     public void delete(CourseEntity courseEntity) {}
