@@ -24,8 +24,8 @@ public class CoursesManager {
             logger.info("Table courses created");
             statement.executeUpdate("Insert into courses (name,place,start_date,end_date) values ('JavaGli2','Gliwice','2019-11-15','2020-09-15')");
             statement.executeUpdate("Insert into courses (name,place,start_date,end_date) values ('JavaGli3','Gliwice','2020-11-15','2021-09-15')");
-            statement.executeUpdate("Insert into courses (name,place,start_date,end_date) values ('JavaGli4','Gliwice','2021-11-15','2022-09-15')");
-            statement.executeUpdate("Insert into courses (name,place,start_date,end_date) values ('JavaGda6','Gdansk','2018-05-15','2019-06-22')");
+            addCours("JavaGli4","Gliwice","2021-11-15","2022-09-15");
+            addCours("JavaGda6","Gdansk","2018-05-15","2019-06-22");
             logger.info("Courses inserted");
         }
     }
@@ -43,9 +43,9 @@ public class CoursesManager {
             statement.executeUpdate("Insert into Students (course_id,name,seat,description) values (1,'Grzegorz','A.3.2','Chce poznac nowe jezyki programowania')");
             statement.executeUpdate("Insert into Students (course_id,name,seat,description) values (1,'Marek','A.3.1','Zmiana pracy')");
             statement.executeUpdate("Insert into Students (course_id,name,seat,description) values (1,'Sebastian','A.3.3','Rozwój zainteresowań')");
-            statement.executeUpdate("Insert into Students (course_id,name,seat,description) values (1,'Marcin','C.2.1','Ciekawość')");
-            statement.executeUpdate("Insert into Students (course_id,name,seat,description) values (1,'Ania','C.1.4','Zmiana pracy')");
-            statement.executeUpdate("Insert into Students (course_id,name,seat,description) values (1,'Ewelina','B.2.1','Rozwój zainteresowań')");
+            addStudent(1,"Marcin","C.2.1","Ciekawość");
+            addStudent(1,"Ania","C.1.4","Zmiana pracy");
+            addStudent(1,"Ewelina","B.2.1","Rozwój zainteresowań");
             logger.info("Students inserted");
         }
 
@@ -74,9 +74,9 @@ public class CoursesManager {
             statement.executeUpdate("Insert into attendance_list (course_id,student_id,date) values (1,1,'2020-01-15')");
             statement.executeUpdate("Insert into attendance_list (course_id,student_id,date) values (1,2,'2020-01-15')");
             statement.executeUpdate("Insert into attendance_list (course_id,student_id,date) values (1,3,'2020-01-15')");
-            statement.executeUpdate("Insert into attendance_list (course_id,student_id,date) values (1,4,'2020-01-15')");
-            statement.executeUpdate("Insert into attendance_list (course_id,student_id,date) values (1,5,'2020-01-15')");
-            statement.executeUpdate("Insert into attendance_list (course_id,student_id,date) values (1,6,'2020-01-15')");
+            addAttend(1,4,"2020-01-15");
+            addAttend(1,5,"2020-01-15");
+            addAttend(1,6,"2020-01-15");
             logger.info("Attendance inserted");
         }
     }
@@ -117,7 +117,7 @@ public class CoursesManager {
                 String name = resultSet.getString("name");
                 String description = resultSet.getString("description");
                 String seat = resultSet.getString("seat");
-                logger.info("{},{},{},{}}", id, name, description,seat);
+                logger.info("{},{},{},{}}", id, name, description, seat);
             }
         }
     }
@@ -127,10 +127,9 @@ public class CoursesManager {
              PreparedStatement statement = connection.prepareStatement(
                      "Select s.id,s.name, c.name course_name,description,seat from students s " +
                              " LEFT JOIN courses c on s.course_id=c.id" +
-                             " where c.id=?") )
-        {
+                             " where c.id=?")) {
 
-            statement.setInt(1,courseId);
+            statement.setInt(1, courseId);
             ResultSet resultSet = statement.executeQuery();
             System.out.println("printAllStudentsPrepared");
             while (resultSet.next()) {
@@ -139,16 +138,62 @@ public class CoursesManager {
                 String description = resultSet.getString("description");
                 String seat = resultSet.getString("seat");
                 String courseName = resultSet.getString("course_name");
-                logger.info("Prepared: {},{},{},{},{}}", id, name, description,seat,courseName);
+                logger.info("Prepared: {},{},{},{},{}}", id, name, description, seat, courseName);
             }
         }
     }
+
+    protected void addStudent(int coursId, String nam, String sit, String descr) throws SQLException {
+        try (Connection connection = connectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement("Insert into Students (course_id,name,seat,description) values (?,?,?,?)")) {
+            statement.setInt(1, coursId);
+            statement.setString(2, nam);
+            statement.setString(3, sit);
+            statement.setString(4, descr);
+            statement.executeUpdate();
+            logger.info("Student " + nam + " inserted.");
+        }
+
+    }
+
+    protected void addCours(String nam, String plc, String sd, String ed) throws SQLException {
+        try (Connection connection = connectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement("Insert into courses (name,place,start_date,end_date) values (?,?,?,?)")) {
+
+            statement.setString(1, nam);
+            statement.setString(2, plc);
+            statement.setString(3, sd);
+            statement.setString(4, ed);
+            statement.executeUpdate();
+            logger.info("Cours " + nam + " inserted.");
+        }
+
+    }
+
+    protected void addAttend(int coursId, int studId, String dt) throws SQLException {
+        try (Connection connection = connectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement("Insert into attendance_list (course_id,student_id,date) values (?,?,?)")) {
+
+            statement.setInt(1, coursId);
+            statement.setInt(2, studId);
+            statement.setString(3, dt);
+            statement.executeUpdate();
+            logger.info("Attendance on " + dt + " inserted.");
+        }
+
+    }
+
     public static void main(String[] args) throws SQLException {
         CoursesManager cm = new CoursesManager("/sda-courses-database.properties");
+        cm.dropAllTables();
         cm.createCoursesTable();
         cm.createStudentsTable();
         cm.createAttendanceListTable();
+        cm.addCours("Oracle tuning", "Gliwice", "2020-06-22", "2021-06-22");
         cm.printAllCourses();
+
+        cm.addAttend(4, 5, "2020-07-25");
+        cm.addStudent(2, "Dawid", "B.2.3", "Zainteresowany technologią mobilną");
         cm.printAllStudents();
         cm.printAllStudentsPrepared(1);
 
