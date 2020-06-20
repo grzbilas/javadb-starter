@@ -1,9 +1,6 @@
 package pl.sda.jdbc.starter;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class SqlInjectionSample {
 
@@ -21,11 +18,12 @@ public class SqlInjectionSample {
     }
 
     public String findAdmin(String login, String password) throws SQLException {
+        String query = "SELECT id, login, password FROM admins WHERE login=? AND password=?;";
         try (Connection connection = new ConnectionFactory().getConnection();
-             Statement statement = connection.createStatement()) {
-            String sql = String.format("SELECT id, login, password FROM admins WHERE login='%s' AND password='%s';", login, password);
-            System.out.println("sql = " + sql);
-            ResultSet resultSet = statement.executeQuery(sql);
+            PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1,login);
+            statement.setString(2,password);
+            ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 int id = resultSet.getInt("id");
                 login = resultSet.getString("login");
@@ -37,12 +35,12 @@ public class SqlInjectionSample {
     }
 
     public void addAdmin(String login, String password) throws SQLException {
+        String query = "INSERT INTO admins(login, password) VALUES(?, ?);";
         try (Connection connection = new ConnectionFactory().getConnection();
-             Statement statement = connection.createStatement()) {
-
-            String sql = String.format("INSERT INTO admins(login, password) VALUES('%s', '%s');", login, password);
-            System.out.println("sql = " + sql);
-            statement.executeUpdate(sql);
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, login);
+            statement.setString(2, password);
+            statement.executeUpdate();
         }
     }
 
@@ -51,23 +49,24 @@ public class SqlInjectionSample {
 
         //sample.createTable();
 
-        /*sample.addAdmin("top", "secret");
+//        sample.addAdmin("albert", "sekurak");
+//        sample.addAdmin("top", "secret");
         System.out.println("admin = " + sample.findAdmin("top", "secret"));
-        System.out.println("not-admin = " + sample.findAdmin("top", "123"));*/
+        System.out.println("not-admin = " + sample.findAdmin("top", "123"));
 
         //dodanie OR'a
-        /*String admin = sample.findAdmin("", "' OR 1='1");
-        System.out.println("admin = " + admin);*/
+        String admin = sample.findAdmin("", "' OR 1='1");
+        System.out.println("admin1 = " + admin);
 
         //dodanie znaku początku komentarza
-        /*String admin = sample.findAdmin("top'#", "123");
-        System.out.println("admin = " + admin);*/
+        String admin2 = sample.findAdmin("top'#", "123");
+        System.out.println("admin2 = " + admin2);
 
         //połączenie OR'a i komentarzy
-        /*String admin = sample.findAdmin("' OR 1=1;#", "123");
-        System.out.println("admin = " + admin);*/
+        String admin3 = sample.findAdmin("' OR 1=1;#", "123");
+        System.out.println("admin3 = " + admin3);
 
         //MultiQueries
-        /*sample.addAdmin("123", "');DROP TABLE admins;#");*/
+        sample.addAdmin("123", "');DROP TABLE admins;#");
     }
 }
