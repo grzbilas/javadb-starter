@@ -58,6 +58,16 @@ public class JdbcBooksDao implements IBooksDao {
 
     @Override
     public void delete(int bookId) {
+        String sql = "Delete from books where id=?";
+        try (Connection connection = connFact.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, bookId);
+            statement.executeUpdate();
+            logg.info("Book with id=" + bookId + " deleted.");
+        } catch (SQLException e) {
+            logg.error("delete Book, Wystapil blad sql: " + sql);
+            logg.error(e.getMessage());
+        }
     }
 
     @Override
@@ -71,5 +81,7 @@ public class JdbcBooksDao implements IBooksDao {
         jbd.addCategory(new Category(1,"Dokument"));
         jbd.addCategory(new Category(2,"Powieść"));
         jbd.add( new Book("Lalka","Bolesław Prus",2));
+        jbd.delete(2);
+//        System.out.println("Usun wszystkie książki "); for (Book b: jbd.list(null)) jbd.delete(b.getId());
     }
 }
