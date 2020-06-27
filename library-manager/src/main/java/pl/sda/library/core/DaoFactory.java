@@ -12,7 +12,8 @@ import pl.sda.library.users.JdbcUsersDao;
  */
 public class DaoFactory {
     public static IUsersDao getUsersDao() {
-        return new JdbcUsersDao();
+        ConnectionFactory connectionFactory = new ConnectionFactory("/library-database.properties");
+        return new JdbcUsersDao(connectionFactory);
     }
 
     public static IBooksDao getBooksDao() {

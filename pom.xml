@@ -14,6 +14,7 @@
         <module>hibernate-starter</module>
         <module>jpa-starter</module>
         <module>commons</module>
+        <module>zoo-keeper4</module>
     </modules>
 
     <dependencies>
