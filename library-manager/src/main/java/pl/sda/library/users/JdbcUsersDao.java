@@ -24,7 +24,7 @@ public class JdbcUsersDao implements IUsersDao {
 
     @Override
     public User findUser(String login, String password) {
-        String sql = "Select id,login,password name, admin from users where login=? and password=?";
+        String sql = "Select id,login,password, name, admin from users where login=? and password=?";
         try (Connection connection = connFact.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, login);
@@ -48,7 +48,7 @@ public class JdbcUsersDao implements IUsersDao {
     @Override
     public List<User> list(UserParameters userParameters) {
         List<User> users = new ArrayList<>();
-        String sql = "Select id,login,password name, admin from users";
+        String sql = "Select id,login,password, name, admin from users";
         try (Connection connection = connFact.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             ResultSet resultSet = statement.executeQuery();
@@ -105,5 +105,9 @@ public class JdbcUsersDao implements IUsersDao {
         dao.addUser(new User(1, "kosz", "smieci", "Jurek", false));
         dao.addUser(new User(1, "komoda", "biolo", "Romek", false));
         dao.addUser(new User(1, "atomek", "idol", "Tomek", true));
+        System.out.println("Znajdz uzytkownika komoda: "+dao.findUser("komoda","biolo"));
+        System.out.println("Pokaz wszystkich uzytkownikow: "+dao.list(null));
+        System.out.println("Usun użytkownika o id=3 "); dao.deleteUser(3);
+        System.out.println("Usun wszystkich userów "); for (User u: dao.list(null)) dao.deleteUser(u.getId());
     }
 }
